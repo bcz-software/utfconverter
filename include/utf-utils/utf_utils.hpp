@@ -44,9 +44,11 @@ namespace utf {
          * @remark Refer to conversion functions' respected documentation for info on #status_e::non_standard_encoding value.
          */
         enum class status_e : int8_t {
+            trailing_without_leading = -3, /**< The byte says it is trailing, but doesn't have a leading byte.*/
+            character_cut_off = -2, /**< The first byte says it has trailing one/-s, but is, in fact, last in the string.*/
             non_standard_encoding = -1, /**< The encoding is not standard-compliant. */
-            undefined_error, /**< There was some error during conversion. */
-            success /**< Everything went smoothly. */
+            undefined_error = 0, /**< There was some error during conversion. */
+            success = 1 /**< Everything went smoothly. */
         };
 
         /**
@@ -307,6 +309,98 @@ using namespace utf::constants;
 
 status_e utf::conversion::utf8_to_utf32(const std::basic_string_view<char8_t>& utf8_sv, std::basic_string<char32_t>& utf32_s, bool comply_with_standard = false) {
     std::basic_string<char32_t> code_points;
+
+    size_t code_unit_count = utf8_sv.size();
+    uint8_t bits_left = 0;
+    uint8_t bytes_left = 0;
+    for (size_t index = 0; index < code_unit_count; index++) {
+        char8_t this_code_unit = utf8_sv[index];
+        // if first bit is zero it's ANSI
+        if (this_code_unit >> 7 == 0) {
+            code_points.push_back(this_code_unit);
+
+            continue;
+        }
+        // if first byte is "is trailing" for some reason
+        if (this_code_unit >> 6 == trailing_byte_marker) {
+            return status_e::trailing_without_leading;
+        }
+        // if first byte denotes double character
+        if (this_code_unit >> 5 == double_byte_marker) {
+            // get rid of markers
+            uint16_t first_bits = static_cast<uint16_t>(this_code_unit << 6);
+
+            // next byte
+            if (++index >= code_unit_count) {
+                return status_e::character_cut_off;
+            }
+            // ~next byte
+
+            uint16_t last_bits = static_cast<uint16_t>((utf8_sv[index] << 2) >> 2);
+            // create code point
+            char16_t code_point = first_bits + last_bits;
+            code_points.push_back(code_point);
+
+            continue;
+        }
+        // if first byte denotes triple character
+        if (this_code_unit >> 4 == triple_byte_marker) {
+            // get rid of markers
+            uint16_t first_bits = static_cast<uint16_t>(this_code_unit) << 12;
+
+            // next byte
+            if(++index >= code_unit_count) {
+                return status_e::character_cut_off;
+            }
+            // ~next byte
+            uint16_t middle_bits = static_cast<uint16_t>((utf8_sv[index] << 2) >> 2) << 6;
+
+            // next byte
+            if(++index >= code_unit_count) {
+                return status_e::character_cut_off;
+            }
+            // ~next byte
+            uint16_t last_bits = static_cast<uint16_t>((utf8_sv[index] << 2) >> 2);
+
+            char16_t code_point = first_bits + middle_bits + last_bits;
+            code_points.push_back(code_point);
+            continue;
+        }
+        // if first byte denotes quadruple character
+        if(this_code_unit >> 3 == quadruple_byte_marker) {
+            uint32_t first_bits = this_code_unit << 18;
+
+            // next byte
+            if(++index >= code_unit_count) {
+                return status_e::character_cut_off;
+            }
+            // ~next byte
+            uint32_t second_bits = static_cast<uint32_t>((utf8_sv[index] << 2) >> 2) << 12;
+
+            // next byte
+            if(++index >= code_unit_count) {
+                return status_e::character_cut_off;
+            }
+            // ~next byte
+            uint32_t third_bits = static_cast<uint32_t>((utf8_sv[index] << 2) >> 2) << 6;
+
+            // next byte
+            if(++index >= code_unit_count) {
+                return status_e::character_cut_off;
+            }
+            // ~next byte
+            uint32_t last_bits = static_cast<uint32_t>((utf8_sv[index] << 2) >> 2);
+
+
+            char32_t code_point = first_bits + second_bits + third_bits + last_bits;
+            code_points.push_back(code_point);
+            continue;
+        }
+    }
+
+
+
+
     return status_e::success;
 }
 
@@ -400,7 +494,7 @@ status_e utf::conversion::utf32_to_utf8(const std::basic_string_view<char32_t>& 
             return status_e::undefined_error;
         }
         if (this_code_point <= one_byte_boundary) {
-            result.push_back(this_code_point);
+            result.push_back(static_cast<char8_t>(this_code_point));
             continue;
         }
         if (this_code_point <= two_byte_boundary) {
