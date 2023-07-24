@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['undefined_5ferror_0',['undefined_error',['../namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a6fa156f5a63046fe2af5de2e98ac61f3',1,'utf::conversion']]]
+  ['success_0',['success',['../namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a260ca9dd8a4577fc00b7bd5810298076',1,'utf::conversion']]]
 ];

@@ -2,6 +2,8 @@ var utf__utils_8hpp =
 [
     [ "char8_t", "utf__utils_8hpp.html#ad62bf0e83d93363062bf3b6e2b22e09f", null ],
     [ "status_e", "utf__utils_8hpp.html#a9bfe457bfa9c6b4460bb83153055ffb0", [
+      [ "trailing_without_leading", "utf__utils_8hpp.html#a9bfe457bfa9c6b4460bb83153055ffb0a58027124f41d9b68912fc0bfceaaa769", null ],
+      [ "character_cut_off", "utf__utils_8hpp.html#a9bfe457bfa9c6b4460bb83153055ffb0a936c866c6c9047a2810e1ada2b919a84", null ],
       [ "non_standard_encoding", "utf__utils_8hpp.html#a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb", null ],
       [ "undefined_error", "utf__utils_8hpp.html#a9bfe457bfa9c6b4460bb83153055ffb0a6fa156f5a63046fe2af5de2e98ac61f3", null ],
       [ "success", "utf__utils_8hpp.html#a9bfe457bfa9c6b4460bb83153055ffb0a260ca9dd8a4577fc00b7bd5810298076", null ]

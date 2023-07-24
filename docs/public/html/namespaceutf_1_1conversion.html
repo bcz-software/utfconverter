@@ -101,9 +101,14 @@ $(document).ready(function(){initNavTree('namespaceutf_1_1conversion.html',''); 
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
-<tr class="memitem:a9bfe457bfa9c6b4460bb83153055ffb0"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0">status_e</a> : int8_t { <a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb">non_standard_encoding</a> = -1
-, <a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a6fa156f5a63046fe2af5de2e98ac61f3">undefined_error</a>
-, <a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a260ca9dd8a4577fc00b7bd5810298076">success</a>
+<tr class="memitem:a9bfe457bfa9c6b4460bb83153055ffb0"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0">status_e</a> : int8_t { <br />
+&#160;&#160;<a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a58027124f41d9b68912fc0bfceaaa769">trailing_without_leading</a> = -3
+, <a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a936c866c6c9047a2810e1ada2b919a84">character_cut_off</a> = -2
+, <a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb">non_standard_encoding</a> = -1
+, <a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a6fa156f5a63046fe2af5de2e98ac61f3">undefined_error</a> = 0
+, <br />
+&#160;&#160;<a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a260ca9dd8a4577fc00b7bd5810298076">success</a> = 1
+<br />
  }</td></tr>
 <tr class="memdesc:a9bfe457bfa9c6b4460bb83153055ffb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Defines return values for conversion functions.  <a href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0">More...</a><br /></td></tr>
 <tr class="separator:a9bfe457bfa9c6b4460bb83153055ffb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -155,7 +160,11 @@ Functions</h2></td></tr>
 <p>Defines return values for conversion functions. </p>
 <dl class="section remark"><dt>Remarks</dt><dd>Refer to conversion functions' respected documentation for info on <a class="el" href="namespaceutf_1_1conversion.html#a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb">status_e::non_standard_encoding</a> value. </dd></dl>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb" name="a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb"></a>non_standard_encoding&#160;</td><td class="fielddoc"><p>The encoding is not standard-compliant. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a9bfe457bfa9c6b4460bb83153055ffb0a58027124f41d9b68912fc0bfceaaa769" name="a9bfe457bfa9c6b4460bb83153055ffb0a58027124f41d9b68912fc0bfceaaa769"></a>trailing_without_leading&#160;</td><td class="fielddoc"><p>The byte says it is trailing, but doesn't have a leading byte. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a9bfe457bfa9c6b4460bb83153055ffb0a936c866c6c9047a2810e1ada2b919a84" name="a9bfe457bfa9c6b4460bb83153055ffb0a936c866c6c9047a2810e1ada2b919a84"></a>character_cut_off&#160;</td><td class="fielddoc"><p>The first byte says it has trailing one/-s, but is, in fact, last in the string. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb" name="a9bfe457bfa9c6b4460bb83153055ffb0a82ded7b365261abc71391e997ec3c0cb"></a>non_standard_encoding&#160;</td><td class="fielddoc"><p>The encoding is not standard-compliant. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="a9bfe457bfa9c6b4460bb83153055ffb0a6fa156f5a63046fe2af5de2e98ac61f3" name="a9bfe457bfa9c6b4460bb83153055ffb0a6fa156f5a63046fe2af5de2e98ac61f3"></a>undefined_error&#160;</td><td class="fielddoc"><p>There was some error during conversion. </p>
 </td></tr>
