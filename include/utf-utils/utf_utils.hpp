@@ -18,13 +18,14 @@
 #include <cstdint>
 #include <cstddef>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #if __cplusplus < 202002L // < c++20
     /**
      * @brief Typedef for char8_t type. Used if and only if C++ standard is less than C++20
      */
-    using char8_t = unsigned char;
+    using char8_t = char;
 #endif
 
 //----------------------------------------------------INTERFACE----------------------------------------------------//
@@ -85,7 +86,6 @@ namespace utf {
          * you also must be able to handle #status_e::non_standard_encoding return value separately.
          */
         status_e utf8_to_utf32(const std::basic_string_view<char8_t>& utf8_sv, std::basic_string<char32_t>& utf32_s, bool comply_with_standard);
-
         /**
          * @brief This function converts UTF-16 string to UTF-8 string.
          * 
@@ -100,7 +100,6 @@ namespace utf {
          * you also must be able to handle #status_e::non_standard_encoding return value separately.
          */
         status_e utf16_to_utf8(const std::basic_string_view<char16_t>& utf16_sv, std::basic_string<char8_t>& utf8_s, bool comply_with_standard);
-
         /**
          * @brief This function converts UTF-16 string to UTF-32 string.
          * 
@@ -115,7 +114,6 @@ namespace utf {
          * you also must be able to handle #status_e::non_standard_encoding return value separately.
          */
         status_e utf16_to_utf32(const std::basic_string_view<char16_t>& utf16_sv, std::basic_string<char32_t>& utf32_s, bool comply_with_standard);
-
         /**
          * @brief This function converts UTF-32 string to UTF-8 string.
          * 
@@ -358,9 +356,9 @@ namespace utf {
      * See <a href="https://en.wikipedia.org/wiki/Byte_order_mark">About BOM</a>.
      */
     constexpr bool utf8_has_bom(const char8_t* code_units) {
-        return code_units[0] == 0xEF &&
-               code_units[1] == 0xBB &&
-               code_units[2] == 0xBF;
+        return (uint8_t)code_units[0] == 0xEF &&
+               (uint8_t)code_units[1] == 0xBB &&
+               (uint8_t)code_units[2] == 0xBF;
     }
     constexpr endianness_e utf16_bom(const char16_t ch) {
         switch (ch) {
@@ -424,21 +422,23 @@ status_e utf::conversion::utf8_to_utf16(const std::basic_string_view<char8_t>& u
 }
 
 status_e utf::conversion::utf8_to_utf32(const std::basic_string_view<char8_t>& utf8_sv, std::basic_string<char32_t>& utf32_s, bool comply_with_standard = false) {
-    std::basic_string<char32_t> code_points;
-    bool has_bom = false;
     size_t code_unit_count = utf8_sv.size();
+
+    bool has_bom = false;
     if (code_unit_count >= 3) {
         has_bom = utf8_has_bom(utf8_sv.data());
         if (has_bom) {
             utf32_s.push_back(byte_order_mark);
         }
     }
+
     // if we have bom, we start from the 4th character in the string as we've handled BOM earlier.
     for (size_t index = has_bom ? 3 : 0; index < code_unit_count; index++) {
-        char8_t this_code_unit = utf8_sv[index];
+        char8_t this_char      = utf8_sv[index];
+        uint8_t this_code_unit = static_cast<uint8_t>(this_char);
         // if first bit is zero it's ANSI
         if (this_code_unit >> 7 == 0) {
-            utf32_s.push_back(this_code_unit);
+            utf32_s.push_back(this_char);
 
             continue;
         }
@@ -450,16 +450,18 @@ status_e utf::conversion::utf8_to_utf32(const std::basic_string_view<char8_t>& u
         // if first byte denotes double character
         if (this_code_unit >> 5 == double_byte_marker) {
             // get rid of markers
-            uint16_t first_bits = static_cast<uint16_t>(this_code_unit << 6);
+            uint16_t first_bits = (this_code_unit & 0x1F) << 6;
 
             // next byte
             if (++index >= code_unit_count) {
                 utf32_s.clear();
                 return status_e::character_cut_off;
             }
+            this_char      = utf8_sv[index];
+            this_code_unit = static_cast<uint8_t>(this_char);
             // ~next byte
 
-            uint16_t last_bits = static_cast<uint16_t>(utf8_sv[index] & 0x3F);
+            uint16_t last_bits = static_cast<uint16_t>(this_code_unit & 0x3F);
             // create code point
             char16_t code_point = first_bits + last_bits;
             utf32_s.push_back(code_point);
@@ -469,23 +471,29 @@ status_e utf::conversion::utf8_to_utf32(const std::basic_string_view<char8_t>& u
         // if first byte denotes triple character
         if (this_code_unit >> 4 == triple_byte_marker) {
             // get rid of markers
-            uint16_t first_bits = static_cast<uint16_t>(this_code_unit) << 12;
+            uint16_t first_bits = (this_code_unit & 0xF) << 12;
 
             // next byte
-            if(++index >= code_unit_count) {
+            if (++index >= code_unit_count) {
                 utf32_s.clear();
                 return status_e::character_cut_off;
             }
+            this_char      = utf8_sv[index];
+            this_code_unit = static_cast<uint8_t>(this_char);
             // ~next byte
-            uint16_t middle_bits = static_cast<uint16_t>(utf8_sv[index] & 0x3F) << 6;
+
+            uint16_t middle_bits = (this_code_unit & 0x3F) << 6;
 
             // next byte
-            if(++index >= code_unit_count) {
+            if (++index >= code_unit_count) {
                 utf32_s.clear();
                 return status_e::character_cut_off;
             }
+            this_char      = utf8_sv[index];
+            this_code_unit = static_cast<uint8_t>(this_char);
             // ~next byte
-            uint16_t last_bits = static_cast<uint16_t>(utf8_sv[index] & 0x3F);
+
+            uint16_t last_bits = this_code_unit & 0x3F;
 
             char16_t code_point = first_bits + middle_bits + last_bits;
             utf32_s.push_back(code_point);
@@ -493,31 +501,38 @@ status_e utf::conversion::utf8_to_utf32(const std::basic_string_view<char8_t>& u
         }
         // if first byte denotes quadruple character
         if(this_code_unit >> 3 == quadruple_byte_marker) {
-            uint32_t first_bits = this_code_unit << 18;
+            uint32_t first_bits = (this_code_unit & 0x7) << 18;
 
             // next byte
-            if(++index >= code_unit_count) {
+            if (++index >= code_unit_count) {
                 utf32_s.clear();
                 return status_e::character_cut_off;
             }
+            this_char      = utf8_sv[index];
+            this_code_unit = static_cast<uint8_t>(this_char);
             // ~next byte
-            uint32_t second_bits = static_cast<uint32_t>(utf8_sv[index] & 0x3F) << 12;
+
+            uint32_t second_bits = static_cast<uint32_t>(this_code_unit & 0x3F) << 12;
 
             // next byte
-            if(++index >= code_unit_count) {
+            if (++index >= code_unit_count) {
                 utf32_s.clear();
                 return status_e::character_cut_off;
             }
+            this_char      = utf8_sv[index];
+            this_code_unit = static_cast<uint8_t>(this_char);
             // ~next byte
-            uint32_t third_bits = static_cast<uint32_t>(utf8_sv[index] & 0x3F) << 6;
+            uint32_t third_bits = static_cast<uint32_t>(this_code_unit & 0x3F) << 6;
 
             // next byte
-            if(++index >= code_unit_count) {
+            if (++index >= code_unit_count) {
                 utf32_s.clear();
                 return status_e::character_cut_off;
             }
+            this_char      = utf8_sv[index];
+            this_code_unit = static_cast<uint8_t>(this_char);
             // ~next byte
-            uint32_t last_bits = static_cast<uint32_t>(utf8_sv[index] & 0x3F);
+            uint32_t last_bits = static_cast<uint32_t>(this_code_unit & 0x3F);
 
 
             char32_t code_point = first_bits + second_bits + third_bits + last_bits;
